@@ -86,7 +86,7 @@ public class Deck : MonoBehaviour
     private void CalculateProbabilities()
 {
     int playerScore = player.GetComponent<CardHand>().points;
-    int dealerScore = dealer.GetComponent<CardHand>().points - dealer.GetComponent<CardHand>().cards[0].GetComponent<Card>().value; // Excluyendo la carta oculta
+    int dealerScore = dealer.GetComponent<CardHand>().points - dealer.GetComponent<CardHand>().cards[0].GetComponent<CardModel>().value; // Excluyendo la carta oculta
 
     // Probabilidad de que el dealer tenga más puntuación que el jugador
     int dealerHigherScoreCount = 0;
