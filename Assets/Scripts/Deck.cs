@@ -129,10 +129,17 @@ public class Deck : MonoBehaviour
 
     void PushDealer()
     {
-        /*TODO:
-         * Dependiendo de cómo se implemente ShuffleCards, es posible que haya que cambiar el índice.
-         */
-        dealer.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]);
+        // Obtiene el componente CardHand del objeto dealer
+        CardHand dealerHand = dealer.GetComponent<CardHand>();
+
+        // Obtiene la cara y el valor de la carta en la posición cardIndex del mazo
+        Sprite cardFace = faces[cardIndex];
+        int cardValue = values[cardIndex];
+
+        // Añade la carta a la mano del dealer
+        dealerHand.Push(cardFace, cardValue);
+
+        // Incrementa cardIndex para la próxima vez que se llame a la función
         cardIndex++;
     }
 
@@ -148,31 +155,58 @@ public class Deck : MonoBehaviour
 
     public void Hit()
     {
-        /*TODO: 
-         * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
-         */
+        // Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
+        if (cardIndex == 4) // 4 cartas ya han sido repartidas (2 al jugador, 2 al dealer)
+        {
+            dealer.GetComponent<CardHand>().InitialToggle();
+        }
 
-        //Repartimos carta al jugador
+        // Repartimos carta al jugador
         PushPlayer();
 
-        /*TODO:
-         * Comprobamos si el jugador ya ha perdido y mostramos mensaje
-         */
-
+        // Comprobamos si el jugador ya ha perdido y mostramos mensaje
+        if (player.GetComponent<CardHand>().points > 21)
+        {
+            // Aquí necesitarás reemplazar "finalMessage" y "hitButton" y "stickButton" con tus propios objetos UI
+            finalMessage.text = "Has perdido!";
+            hitButton.interactable = false;
+            stickButton.interactable = false;
+        }
     }
 
     public void Stand()
     {
-        /*TODO: 
-         * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
-         */
+        // Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
+        if (cardIndex == 4) // 4 cartas ya han sido repartidas (2 al jugador, 2 al dealer)
+        {
+            dealer.GetComponent<CardHand>().InitialToggle();
+        }
 
-        /*TODO:
-         * Repartimos cartas al dealer si tiene 16 puntos o menos
-         * El dealer se planta al obtener 17 puntos o más
-         * Mostramos el mensaje del que ha ganado
-         */
+        // Repartimos cartas al dealer si tiene 16 puntos o menos
+        while (dealer.GetComponent<CardHand>().points <= 16)
+        {
+            PushDealer();
+        }
 
+        // Mostramos el mensaje del que ha ganado
+        if (dealer.GetComponent<CardHand>().points > 21 || player.GetComponent<CardHand>().points > dealer.GetComponent<CardHand>().points)
+        {
+            // Aquí necesitarás reemplazar "finalMessage" con tu propio objeto UI
+            finalMessage.text = "¡Has ganado!";
+        }
+        else if (dealer.GetComponent<CardHand>().points > player.GetComponent<CardHand>().points)
+        {
+            finalMessage.text = "Has perdido!";
+        }
+        else
+        {
+            finalMessage.text = "¡Empate!";
+        }
+
+        // Desactivamos los botones
+        // Aquí necesitarás reemplazar "hitButton" y "stickButton" con tus propios objetos UI
+        hitButton.interactable = false;
+        stickButton.interactable = false;
     }
 
     public void PlayAgain()
