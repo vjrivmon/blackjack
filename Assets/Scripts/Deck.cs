@@ -31,15 +31,11 @@ public class Deck : MonoBehaviour
     {
         for (int i = 0; i < values.Length; i++)
         {
-            if (i % 13 == 0 || i % 13 > 9)
+            values[i] = i % 13 + 1;
+            if (values[i] == 10) values[i] = 10;
+            if (values[i] == 1)
             {
-                // Asignar 10 a las figuras J, Q, K y al As
-                values[i] = 10;
-            }
-            else
-            {
-                // Asignar el valor nominal a las cartas del 2 al 10
-                values[i] = (i % 13) + 1;
+                values[i] = 11;
             }
         }
     }
@@ -135,6 +131,14 @@ public class Deck : MonoBehaviour
         // Obtiene la cara y el valor de la carta en la posición cardIndex del mazo
         Sprite cardFace = faces[cardIndex];
         int cardValue = values[cardIndex];
+
+        // Crea un nuevo objeto GameObject para la carta
+        GameObject cardObject = new GameObject("DealerCard" + cardIndex);
+        cardObject.transform.parent = dealer.transform; // Establece el objeto dealer como padre
+
+        // Posiciona la carta en la parte superior de la pantalla
+        //cardObject.transform.localPosition = new Vector3(xPosition, yPosition, 0); // Ajusta las coordenadas
+        cardObject.transform.localPosition = new Vector3(0, Screen.height / 2, 0);
 
         // Añade la carta a la mano del dealer
         dealerHand.Push(cardFace, cardValue);
