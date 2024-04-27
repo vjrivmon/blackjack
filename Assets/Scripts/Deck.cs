@@ -10,7 +10,10 @@ public class Deck : MonoBehaviour
     public Button stickButton;
     public Button playAgainButton;
     public Text finalMessage;
-    public Text probMessage;
+    public Text pruebabMessage;
+    public Text dealerHigherScoreText;
+    public Text playerGoodScoreText;
+    public Text playerBustText;
 
     public int[] values = new int[52];
     int cardIndex = 0;
@@ -60,68 +63,68 @@ public class Deck : MonoBehaviour
 
 
     void StartGame()
-{
-    for (int i = 0; i < 2; i++)
     {
-        PushPlayer();
-        PushDealer();
-    }
+        for (int i = 0; i < 2; i++)
+        {
+            PushPlayer();
+            PushDealer();
+        }
 
-    // Comprobar si el jugador o el dealer tienen Blackjack
-    if ((player.GetComponent<CardHand>().points == 21 && player.GetComponent<CardHand>().cards.Count == 2) ||
-        (dealer.GetComponent<CardHand>().points == 21 && dealer.GetComponent<CardHand>().cards.Count == 2))
-    {
-        // Desactivar los botones de Hit y Stand
-        hitButton.interactable = false;
-        stickButton.interactable = false;
-        // Mostrar mensaje de que alguien tiene Blackjack
-        finalMessage.text = "Blackjack!";
+        // Comprobar si el jugador o el dealer tienen Blackjack
+        if ((player.GetComponent<CardHand>().points == 21 && player.GetComponent<CardHand>().cards.Count == 2) ||
+            (dealer.GetComponent<CardHand>().points == 21 && dealer.GetComponent<CardHand>().cards.Count == 2))
+        {
+            // Desactivar los botones de Hit y Stand
+            hitButton.interactable = false;
+            stickButton.interactable = false;
+            // Mostrar mensaje de que alguien tiene Blackjack
+            finalMessage.text = "Blackjack!";
+        }
     }
-}
 
     private void CalculateProbabilities()
-{
-    int playerScore = player.GetComponent<CardHand>().points;
-    int dealerScore = dealer.GetComponent<CardHand>().points - dealer.GetComponent<CardHand>().cards[0].GetComponent<CardModel>().value; // Excluyendo la carta oculta
-
-    // Probabilidad de que el dealer tenga más puntuación que el jugador
-    int dealerHigherScoreCount = 0;
-    for (int i = 0; i < values.Length; i++)
     {
-        if (dealerScore + values[i] > playerScore && dealerScore + values[i] <= 21)
-        {
-            dealerHigherScoreCount++;
-        }
-    }
-    float dealerHigherScoreProbability = (float)dealerHigherScoreCount / (values.Length - player.GetComponent<CardHand>().cards.Count - dealer.GetComponent<CardHand>().cards.Count);
+        int playerScore = player.GetComponent<CardHand>().points;
+        int dealerScore = dealer.GetComponent<CardHand>().points - dealer.GetComponent<CardHand>().cards[0].GetComponent<CardModel>().value; // Excluyendo la carta oculta
 
-    // Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta
-    int playerGoodScoreCount = 0;
-    for (int i = 0; i < values.Length; i++)
-    {
-        if (playerScore + values[i] >= 17 && playerScore + values[i] <= 21)
+        // Probabilidad de que el dealer tenga más puntuación que el jugador
+        int dealerHigherScoreCount = 0;
+        for (int i = 0; i < values.Length; i++)
         {
-            playerGoodScoreCount++;
+            if (dealerScore + values[i] > playerScore && dealerScore + values[i] <= 21)
+            {
+                dealerHigherScoreCount++;
+            }
         }
-    }
-    float playerGoodScoreProbability = (float)playerGoodScoreCount / (values.Length - player.GetComponent<CardHand>().cards.Count - dealer.GetComponent<CardHand>().cards.Count);
+        float dealerHigherScoreProbability = (float)dealerHigherScoreCount / (values.Length - player.GetComponent<CardHand>().cards.Count - dealer.GetComponent<CardHand>().cards.Count);
 
-    // Probabilidad de que el jugador obtenga más de 21 si pide una carta
-    int playerBustCount = 0;
-    for (int i = 0; i < values.Length; i++)
-    {
-        if (playerScore + values[i] > 21)
+        // Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta
+        int playerGoodScoreCount = 0;
+        for (int i = 0; i < values.Length; i++)
         {
-            playerBustCount++;
+            if (playerScore + values[i] >= 17 && playerScore + values[i] <= 21)
+            {
+                playerGoodScoreCount++;
+            }
         }
-    }
-    float playerBustProbability = (float)playerBustCount / (values.Length - player.GetComponent<CardHand>().cards.Count - dealer.GetComponent<CardHand>().cards.Count);
+        float playerGoodScoreProbability = (float)playerGoodScoreCount / (values.Length - player.GetComponent<CardHand>().cards.Count - dealer.GetComponent<CardHand>().cards.Count);
 
-    // Imprimir las probabilidades
-    Debug.Log("Probabilidad de que el dealer tenga más puntuación que el jugador: " + dealerHigherScoreProbability);
-    Debug.Log("Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta: " + playerGoodScoreProbability);
-    Debug.Log("Probabilidad de que el jugador obtenga más de 21 si pide una carta: " + playerBustProbability);
-}
+        // Probabilidad de que el jugador obtenga más de 21 si pide una carta
+        int playerBustCount = 0;
+        for (int i = 0; i < values.Length; i++)
+        {
+            if (playerScore + values[i] > 21)
+            {
+                playerBustCount++;
+            }
+        }
+        float playerBustProbability = (float)playerBustCount / (values.Length - player.GetComponent<CardHand>().cards.Count - dealer.GetComponent<CardHand>().cards.Count);
+
+        // Imprimir las probabilidades
+        Debug.Log("Probabilidad de que el dealer tenga más puntuación que el jugador: " + dealerHigherScoreProbability);
+        Debug.Log("Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta: " + playerGoodScoreProbability);
+        Debug.Log("Probabilidad de que el jugador obtenga más de 21 si pide una carta: " + playerBustProbability);
+    }
 
     void PushDealer()
     {
@@ -218,8 +221,21 @@ public class Deck : MonoBehaviour
         hitButton.interactable = true;
         stickButton.interactable = true;
         finalMessage.text = "";
-        player.GetComponent<CardHand>().Clear();
-        dealer.GetComponent<CardHand>().Clear();
+
+        // Eliminar cartas del jugador
+        foreach (GameObject carta in player.GetComponent<CardHand>().cards)
+        {
+            Destroy(carta);
+        }
+        player.GetComponent<CardHand>().Clear(); // Asegúrate de limpiar también la lista en CardHand 
+
+        // Eliminar cartas del dealer
+        foreach (GameObject carta in dealer.GetComponent<CardHand>().cards)
+        {
+            Destroy(carta);
+        }
+        dealer.GetComponent<CardHand>().Clear(); // Limpiar la lista en CardHand 
+
         cardIndex = 0;
         ShuffleCards();
         StartGame();
