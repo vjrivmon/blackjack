@@ -14,18 +14,18 @@ public class CardHand : MonoBehaviour
         points = 0;
         //Definimos dónde posicionamos las cartas de cada uno
         if (!isDealer)
-            coordY = 3;
+            coordY = 2;
         else
-            coordY = -1;
+            coordY = -2;
     }
 
     public void Clear()
     {
         points = 0;
         if (!isDealer)
-            coordY = 3;
+            coordY = 2;
         else
-            coordY = -1;
+            coordY = -2;
         foreach (GameObject g in cards)
         {
             Destroy(g);
@@ -45,7 +45,7 @@ public class CardHand : MonoBehaviour
         cards.Add(cardCopy);
 
         //La posicionamos en el tablero 
-        float coordX = (float)1.4 * (float)(cards.Count - 4);
+        float coordX = (float)1.4 * (float)(cards.Count - 3);
         Vector3 pos = new Vector3(coordX, coordY);
         cardCopy.transform.position = pos;
 
