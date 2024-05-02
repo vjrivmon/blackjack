@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class Deck : MonoBehaviour
@@ -156,9 +157,9 @@ public class Deck : MonoBehaviour
         }
         float playerBustProbability = (float)playerBustCount / remainingCards;
 
-        prob1.text = dealerHigherScoreProbability.ToString();
-        prob2.text = player17to21Probability.ToString();
-        prob3.text = playerBustProbability.ToString();
+        prob1.text = Math.Round(dealerHigherScoreProbability, 4).ToString();
+        prob2.text = Math.Round(player17to21Probability, 4).ToString();
+        prob3.text = Math.Round(playerBustProbability, 4).ToString();
     }
 
     void PushDealer()
