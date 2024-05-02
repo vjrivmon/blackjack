@@ -13,6 +13,9 @@ public class Deck : MonoBehaviour
     public Button playAgainButton;
     public Text finalMessage;
     public Text probMessage;
+    public Text prob1;
+    public Text prob2;
+    public Text prob3;
     private bool isInitialHand = true;
 
     public int[] values = new int[52];
@@ -99,12 +102,12 @@ public class Deck : MonoBehaviour
             // Asumiendo que tienes métodos GetPlayerScore() y GetDealerScore() que devuelven la puntuación actual
             if (GetPlayerScore() == 21 && i == 1) // Verificar si el jugador tiene Blackjack después de repartir las dos cartas
             {
-                Debug.Log("El jugador tiene Blackjack!");
+                finalMessage.text = "El jugador tiene Blackjack!";
                 return; // Terminar el juego
             }
             else if (GetDealerScore() == 21 && i == 1) // Verificar si el crupier tiene Blackjack después de repartir las dos cartas
             {
-                Debug.Log("El crupier tiene Blackjack!");
+                finalMessage.text = "El crupier tiene Blackjack!";
                 return; // Terminar el juego
             }
         }
@@ -153,9 +156,9 @@ public class Deck : MonoBehaviour
         }
         float playerBustProbability = (float)playerBustCount / remainingCards;
 
-        Debug.Log("Probabilidad de que el dealer tenga más puntuación que el jugador: " + dealerHigherScoreProbability);
-        Debug.Log("Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta: " + player17to21Probability);
-        Debug.Log("Probabilidad de que el jugador obtenga más de 21 si pide una carta: " + playerBustProbability);
+        prob1.text = dealerHigherScoreProbability.ToString();
+        prob2.text = player17to21Probability.ToString();
+        prob3.text = playerBustProbability.ToString();
     }
 
     void PushDealer()
@@ -205,7 +208,7 @@ public class Deck : MonoBehaviour
         if (GetPlayerScore() > 21)
         {
             // El jugador ha perdido, mostrar mensaje
-            Debug.Log("El jugador ha perdido.");
+            finalMessage.text = "El jugador ha perdido.";
         }
     }
     public void Stand()
@@ -227,23 +230,23 @@ public class Deck : MonoBehaviour
         // Mostrar el mensaje del que ha ganado
         if (GetPlayerScore() > 21)
         {
-            Debug.Log("El dealer ha ganado.");
+            finalMessage.text = "El dealer ha ganado.";
         }
         else if (GetDealerScore() > 21)
         {
-            Debug.Log("El jugador ha ganado.");
+            finalMessage.text = "El jugador ha ganado.";
         }
         else if (GetPlayerScore() > GetDealerScore())
         {
-            Debug.Log("El jugador ha ganado.");
+            finalMessage.text = "El jugador ha ganado.";
         }
         else if (GetDealerScore() > GetPlayerScore())
         {
-            Debug.Log("El dealer ha ganado.");
+            finalMessage.text = "El dealer ha ganado.";
         }
         else
         {
-            Debug.Log("Es un empate.");
+            finalMessage.text = "Es un empate.";
         }
     }
 
@@ -252,6 +255,9 @@ public class Deck : MonoBehaviour
         hitButton.interactable = true;
         stickButton.interactable = true;
         finalMessage.text = "";
+        prob1.text="";
+        prob2.text="";
+        prob3.text="";
         player.GetComponent<CardHand>().Clear();
         dealer.GetComponent<CardHand>().Clear();
         cardIndex = 0;
