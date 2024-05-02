@@ -3,6 +3,8 @@ using UnityEngine.UI;
 
 public class Deck : MonoBehaviour
 {
+
+    /* values: para asignar un valor a cada una de las 52 cartas. cardIndex: para mantener el contador de las cartas repartidas. Adem´ as, se definen los siguientes m´etodos que representan la din´amica del juego: InitCardValues. Este m´etodo se encarga de inicializar los valores de las 52 cartas. En principio, la posici´on de los valores se deber´an corresponder con la posici´on de faces. En este sentido, si la carta de la posici´on 1 de faces es el 2 de corazones, el valor de la posici´on 1 deber´ ıa ser un 2. ShuffleCards. Este m´etodo se encarga de barajar las cartas de manera aleatoria. StartGame. Este m´etodo se encarga de repartir las dos primeras manos. CalculateProbabilities. Este m´ etodo se encarga de calcular varias probabilidades en funci´on de las cartas que ya hay sobre la mesa. PushDealer. Este m´etodo se encarga de repartir una carta al Dealer. PushPlayer. Este m´etodo se encarga de repartir una carta al Dealer. Hit. Este m´etodo se asocia al bot´on Hit e implementa la l´ogica de pedir carta. Stand. Este m´etodo se asocia al bot´on Stand e implementa la l´ogica de plantarse. PlayAgain. Este m´ etodo se asocia al bot´on PlayAgain y se encarga de inicializar los valores para volver a jugar.*/
     public Sprite[] faces;
     public GameObject dealer;
     public GameObject player;
@@ -10,10 +12,8 @@ public class Deck : MonoBehaviour
     public Button stickButton;
     public Button playAgainButton;
     public Text finalMessage;
-    public Text pruebabMessage;
-    public Text dealerHigherScoreText;
-    public Text playerGoodScoreText;
-    public Text playerBustText;
+    public Text probMessage;
+    private bool isInitialHand = true;
 
     public int[] values = new int[52];
     int cardIndex = 0;
@@ -29,38 +29,65 @@ public class Deck : MonoBehaviour
         ShuffleCards();
         StartGame();
     }
+    // Assuming you have a CardHand script with a method GetScore() that calculates the score of a hand
+    public int GetPlayerScore()
+    {
+        return player.GetComponent<CardHand>().GetScore();
+    }
 
+    public int GetDealerScore()
+    {
+        return dealer.GetComponent<CardHand>().GetScore();
+    }
+
+    public int GetRemainingCards()
+    {
+        return values.Length - cardIndex;
+    }
+
+    // Assuming you have a boolean variable isInitialHand that is set to true when the game starts and set to false when the first action (Hit or Stand) is taken
+    public bool IsInitialHand()
+    {
+        return isInitialHand;
+    }
     private void InitCardValues()
     {
-        for (int i = 0; i < values.Length; i++)
+        values = new int[52];
+        for (int i = 0; i < 52; i++)
         {
-            values[i] = i % 13 + 1;
-            if (values[i] == 10) values[i] = 10;
-            if (values[i] == 1)
+            if (i % 13 < 9) // Los números 2 a 10
             {
-                values[i] = 11;
+                values[i] = (i % 13) + 2;
+            }
+            else if (i % 13 < 12) // Las figuras J, Q, K
+            {
+                values[i] = 10;
+            }
+            else // El As
+            {
+                values[i] = 11; // En el juego de Blackjack, el As puede valer 1 u 11. Aquí lo inicializamos a 11.
             }
         }
     }
 
     private void ShuffleCards()
     {
-        System.Random rand = new System.Random();
-        for (int i = values.Length - 1; i > 0; i--)
+        System.Random rng = new System.Random();
+        int n = values.Length;
+        while (n > 1)
         {
-            // Elige una posición aleatoria anterior
-            int j = rand.Next(i + 1);
-            // Intercambia values[i] con values[j]
-            int tempValue = values[i];
-            values[i] = values[j];
-            values[j] = tempValue;
-            // Intercambia faces[i] con faces[j]
-            Sprite tempFace = faces[i];
-            faces[i] = faces[j];
-            faces[j] = tempFace;
+            n--;
+            int k = rng.Next(n + 1);
+            int tempValue = values[k];
+            values[k] = values[n];
+            values[n] = tempValue;
+
+            // Asumiendo que también tienes un array de caras que necesitas barajar
+            Sprite tempFace = faces[k];
+            faces[k] = faces[n];
+            faces[n] = tempFace;
         }
     }
-
 
     void StartGame()
     {
@@ -68,152 +95,156 @@ public class Deck : MonoBehaviour
         {
             PushPlayer();
             PushDealer();
-        }
 
-        // Comprobar si el jugador o el dealer tienen Blackjack
-        if ((player.GetComponent<CardHand>().points == 21 && player.GetComponent<CardHand>().cards.Count == 2) ||
-            (dealer.GetComponent<CardHand>().points == 21 && dealer.GetComponent<CardHand>().cards.Count == 2))
-        {
-            // Desactivar los botones de Hit y Stand
-            hitButton.interactable = false;
-            stickButton.interactable = false;
-            // Mostrar mensaje de que alguien tiene Blackjack
-            finalMessage.text = "Blackjack!";
+            // Asumiendo que tienes métodos GetPlayerScore() y GetDealerScore() que devuelven la puntuación actual
+            if (GetPlayerScore() == 21 && i == 1) // Verificar si el jugador tiene Blackjack después de repartir las dos cartas
+            {
+                Debug.Log("El jugador tiene Blackjack!");
+                return; // Terminar el juego
+            }
+            else if (GetDealerScore() == 21 && i == 1) // Verificar si el crupier tiene Blackjack después de repartir las dos cartas
+            {
+                Debug.Log("El crupier tiene Blackjack!");
+                return; // Terminar el juego
+            }
         }
     }
 
     private void CalculateProbabilities()
     {
-        int playerScore = player.GetComponent<CardHand>().points;
-        int dealerScore = dealer.GetComponent<CardHand>().points - dealer.GetComponent<CardHand>().cards[0].GetComponent<CardModel>().value; // Excluyendo la carta oculta
+        // Asumiendo que tienes métodos GetPlayerScore() y GetDealerScore() que devuelven la puntuación actual
+        // y un método GetRemainingCards() que devuelve el número de cartas restantes en la baraja
+
+        int playerScore = GetPlayerScore();
+        int dealerScore = GetDealerScore();
+        int remainingCards = GetRemainingCards();
 
         // Probabilidad de que el dealer tenga más puntuación que el jugador
         int dealerHigherScoreCount = 0;
-        for (int i = 0; i < values.Length; i++)
+        for (int i = 0; i < remainingCards; i++)
         {
-            if (dealerScore + values[i] > playerScore && dealerScore + values[i] <= 21)
+            if (dealerScore + values[i] > playerScore)
             {
                 dealerHigherScoreCount++;
             }
         }
-        float dealerHigherScoreProbability = (float)dealerHigherScoreCount / (values.Length - player.GetComponent<CardHand>().cards.Count - dealer.GetComponent<CardHand>().cards.Count);
+        float dealerHigherScoreProbability = (float)dealerHigherScoreCount / remainingCards;
 
         // Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta
-        int playerGoodScoreCount = 0;
-        for (int i = 0; i < values.Length; i++)
+        int player17to21Count = 0;
+        for (int i = 0; i < remainingCards; i++)
         {
-            if (playerScore + values[i] >= 17 && playerScore + values[i] <= 21)
+            int newScore = playerScore + values[i];
+            if (newScore >= 17 && newScore <= 21)
             {
-                playerGoodScoreCount++;
+                player17to21Count++;
             }
         }
-        float playerGoodScoreProbability = (float)playerGoodScoreCount / (values.Length - player.GetComponent<CardHand>().cards.Count - dealer.GetComponent<CardHand>().cards.Count);
+        float player17to21Probability = (float)player17to21Count / remainingCards;
 
         // Probabilidad de que el jugador obtenga más de 21 si pide una carta
         int playerBustCount = 0;
-        for (int i = 0; i < values.Length; i++)
+        for (int i = 0; i < remainingCards; i++)
         {
             if (playerScore + values[i] > 21)
             {
                 playerBustCount++;
             }
         }
-        float playerBustProbability = (float)playerBustCount / (values.Length - player.GetComponent<CardHand>().cards.Count - dealer.GetComponent<CardHand>().cards.Count);
+        float playerBustProbability = (float)playerBustCount / remainingCards;
 
-        // Imprimir las probabilidades
         Debug.Log("Probabilidad de que el dealer tenga más puntuación que el jugador: " + dealerHigherScoreProbability);
-        Debug.Log("Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta: " + playerGoodScoreProbability);
+        Debug.Log("Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta: " + player17to21Probability);
         Debug.Log("Probabilidad de que el jugador obtenga más de 21 si pide una carta: " + playerBustProbability);
     }
 
     void PushDealer()
     {
-        // Obtiene el componente CardHand del objeto dealer
-        CardHand dealerHand = dealer.GetComponent<CardHand>();
+        // Asegurarse de que no se repartan más cartas de las que hay en la baraja
+        if (cardIndex >= faces.Length)
+        {
+            Debug.Log("No hay más cartas en la baraja.");
+            return;
+        }
 
-        // Obtiene la cara y el valor de la carta en la posición cardIndex del mazo
-        Sprite cardFace = faces[cardIndex];
-        int cardValue = values[cardIndex];
-
-        // Crea un nuevo objeto GameObject para la carta
-        GameObject cardObject = new GameObject("DealerCard" + cardIndex);
-        cardObject.transform.parent = dealer.transform; // Establece el objeto dealer como padre
-
-        // Posiciona la carta en la parte superior de la pantalla
-        //cardObject.transform.localPosition = new Vector3(xPosition, yPosition, 0); // Ajusta las coordenadas
-        cardObject.transform.localPosition = new Vector3(0, Screen.height / 2, 0);
-
-        // Añade la carta a la mano del dealer
-        dealerHand.Push(cardFace, cardValue);
-
-        // Incrementa cardIndex para la próxima vez que se llame a la función
+        // Repartir la carta al crupier
+        dealer.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]);
         cardIndex++;
     }
 
     void PushPlayer()
     {
-        /*TODO:
-         * Dependiendo de cómo se implemente ShuffleCards, es posible que haya que cambiar el índice.
-         */
-        player.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]/*,cardCopy*/);
+        // Asegurarse de que no se repartan más cartas de las que hay en la baraja
+        if (cardIndex >= faces.Length)
+        {
+            Debug.Log("No hay más cartas en la baraja.");
+            return;
+        }
+
+        // Repartir la carta al jugador
+        player.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]);
         cardIndex++;
+
+        // Calcular las probabilidades después de repartir la carta
         CalculateProbabilities();
     }
 
     public void Hit()
     {
-        // Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
-        if (cardIndex == 4) // 4 cartas ya han sido repartidas (2 al jugador, 2 al dealer)
+        // Asumiendo que tienes un método IsInitialHand() que devuelve true si estamos en la mano inicial
+        if (IsInitialHand())
         {
-            dealer.GetComponent<CardHand>().InitialToggle();
+            // Voltear la primera carta del dealer
+            dealer.GetComponent<CardHand>().FlipFirstCard();
         }
 
-        // Repartimos carta al jugador
+        // Repartir carta al jugador
         PushPlayer();
 
-        // Comprobamos si el jugador ya ha perdido y mostramos mensaje
-        if (player.GetComponent<CardHand>().points > 21)
+        // Asumiendo que tienes un método GetPlayerScore() que devuelve la puntuación actual del jugador
+        if (GetPlayerScore() > 21)
         {
-            // Aquí necesitarás reemplazar "finalMessage" y "hitButton" y "stickButton" con tus propios objetos UI
-            finalMessage.text = "Has perdido!";
-            hitButton.interactable = false;
-            stickButton.interactable = false;
+            // El jugador ha perdido, mostrar mensaje
+            Debug.Log("El jugador ha perdido.");
         }
     }
-
     public void Stand()
     {
-        // Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
-        if (cardIndex == 4) // 4 cartas ya han sido repartidas (2 al jugador, 2 al dealer)
+        // Asumiendo que tienes un método IsInitialHand() que devuelve true si estamos en la mano inicial
+        if (IsInitialHand())
         {
-            dealer.GetComponent<CardHand>().InitialToggle();
+            // Voltear la primera carta del dealer
+            dealer.GetComponent<CardHand>().FlipFirstCard();
         }
 
-        // Repartimos cartas al dealer si tiene 16 puntos o menos
-        while (dealer.GetComponent<CardHand>().points <= 16)
+        // Asumiendo que tienes un método GetDealerScore() que devuelve la puntuación actual del dealer
+        while (GetDealerScore() <= 16)
         {
+            // Repartir cartas al dealer si tiene 16 puntos o menos
             PushDealer();
         }
 
-        // Mostramos el mensaje del que ha ganado
-        if (dealer.GetComponent<CardHand>().points > 21 || player.GetComponent<CardHand>().points > dealer.GetComponent<CardHand>().points)
+        // Mostrar el mensaje del que ha ganado
+        if (GetPlayerScore() > 21)
         {
-            // Aquí necesitarás reemplazar "finalMessage" con tu propio objeto UI
-            finalMessage.text = "¡Has ganado!";
+            Debug.Log("El dealer ha ganado.");
         }
-        else if (dealer.GetComponent<CardHand>().points > player.GetComponent<CardHand>().points)
+        else if (GetDealerScore() > 21)
         {
-            finalMessage.text = "Has perdido!";
+            Debug.Log("El jugador ha ganado.");
+        }
+        else if (GetPlayerScore() > GetDealerScore())
+        {
+            Debug.Log("El jugador ha ganado.");
+        }
+        else if (GetDealerScore() > GetPlayerScore())
+        {
+            Debug.Log("El dealer ha ganado.");
         }
         else
         {
-            finalMessage.text = "¡Empate!";
+            Debug.Log("Es un empate.");
         }
-
-        // Desactivamos los botones
-        // Aquí necesitarás reemplazar "hitButton" y "stickButton" con tus propios objetos UI
-        hitButton.interactable = false;
-        stickButton.interactable = false;
     }
 
     public void PlayAgain()
@@ -221,21 +252,8 @@ public class Deck : MonoBehaviour
         hitButton.interactable = true;
         stickButton.interactable = true;
         finalMessage.text = "";
-
-        // Eliminar cartas del jugador
-        foreach (GameObject carta in player.GetComponent<CardHand>().cards)
-        {
-            Destroy(carta);
-        }
-        player.GetComponent<CardHand>().Clear(); // Asegúrate de limpiar también la lista en CardHand 
-
-        // Eliminar cartas del dealer
-        foreach (GameObject carta in dealer.GetComponent<CardHand>().cards)
-        {
-            Destroy(carta);
-        }
-        dealer.GetComponent<CardHand>().Clear(); // Limpiar la lista en CardHand 
-
+        player.GetComponent<CardHand>().Clear();
+        dealer.GetComponent<CardHand>().Clear();
         cardIndex = 0;
         ShuffleCards();
         StartGame();
