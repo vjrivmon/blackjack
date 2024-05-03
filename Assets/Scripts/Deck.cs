@@ -59,21 +59,20 @@ public class Deck : MonoBehaviour
         values = new int[52];
         for (int i = 0; i < 52; i++)
         {
-            if (i % 13 < 9) // Los números 2 a 10
+            if (i % 13 < 9) // Números del 2 al 10
             {
                 values[i] = (i % 13) + 2;
             }
-            else if (i % 13 < 12) // Las figuras J, Q, K
+            else if (i % 13 == 10 || i % 13 == 11 || i % 13 == 12) // J, Q, K
             {
                 values[i] = 10;
             }
-            else // El As
+            else // As
             {
-                values[i] = 11; // En el juego de Blackjack, el As puede valer 1 u 11. Aquí lo inicializamos a 11.
+                values[i] = 11;
             }
         }
     }
-
     private void ShuffleCards()
     {
         System.Random rng = new System.Random();
@@ -100,7 +99,7 @@ public class Deck : MonoBehaviour
             PushPlayer();
             PushDealer();
 
-            // Asumiendo que tienes métodos GetPlayerScore() y GetDealerScore() que devuelven la puntuación actual
+            /*// Asumiendo que tienes métodos GetPlayerScore() y GetDealerScore() que devuelven la puntuación actual
             if (GetPlayerScore() == 21 && i == 1) // Verificar si el jugador tiene Blackjack después de repartir las dos cartas
             {
                 finalMessage.text = "El jugador tiene Blackjack!";
@@ -110,15 +109,12 @@ public class Deck : MonoBehaviour
             {
                 finalMessage.text = "El crupier tiene Blackjack!";
                 return; // Terminar el juego
-            }
+            }*/
         }
     }
 
     private void CalculateProbabilities()
     {
-        // Asumiendo que tienes métodos GetPlayerScore() y GetDealerScore() que devuelven la puntuación actual
-        // y un método GetRemainingCards() que devuelve el número de cartas restantes en la baraja
-
         int playerScore = GetPlayerScore();
         int dealerScore = GetDealerScore();
         int remainingCards = GetRemainingCards();
@@ -127,26 +123,32 @@ public class Deck : MonoBehaviour
         int dealerHigherScoreCount = 0;
         for (int i = 0; i < remainingCards; i++)
         {
-            if (dealerScore + values[i] > playerScore)
+            int newDealerScore = dealerScore + values[i];
+            if (newDealerScore > playerScore)
             {
                 dealerHigherScoreCount++;
             }
         }
         float dealerHigherScoreProbability = (float)dealerHigherScoreCount / remainingCards;
 
-        // Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta
+        // Probabilidad de que el jugador obtenga entre 17 y 21 o blackjack
         int player17to21Count = 0;
+        int playerBlackjackCount = 0;
         for (int i = 0; i < remainingCards; i++)
         {
             int newScore = playerScore + values[i];
-            if (newScore >= 17 && newScore <= 21)
+            if (newScore <= 21)
             {
                 player17to21Count++;
             }
+            else if (newScore == 22 && playerScore == 11) // Blackjack
+            {
+                playerBlackjackCount++;
+            }
         }
-        float player17to21Probability = (float)player17to21Count / remainingCards;
+        float player17to21Probability = (float)(player17to21Count + playerBlackjackCount) / remainingCards;
 
-        // Probabilidad de que el jugador obtenga más de 21 si pide una carta
+        // Probabilidad de que el jugador se pase de 21
         int playerBustCount = 0;
         for (int i = 0; i < remainingCards; i++)
         {
@@ -205,51 +207,67 @@ public class Deck : MonoBehaviour
         // Repartir carta al jugador
         PushPlayer();
 
-        // Asumiendo que tienes un método GetPlayerScore() que devuelve la puntuación actual del jugador
-        if (GetPlayerScore() > 21)
-        {
-            // El jugador ha perdido, mostrar mensaje
-            finalMessage.text = "El jugador ha perdido.";
-        }
     }
     public void Stand()
     {
-        // Asumiendo que tienes un método IsInitialHand() que devuelve true si estamos en la mano inicial
         if (IsInitialHand())
         {
-            // Voltear la primera carta del dealer
             dealer.GetComponent<CardHand>().FlipFirstCard();
         }
 
-        // Asumiendo que tienes un método GetDealerScore() que devuelve la puntuación actual del dealer
         while (GetDealerScore() <= 16)
         {
-            // Repartir cartas al dealer si tiene 16 puntos o menos
             PushDealer();
         }
 
-        // Mostrar el mensaje del que ha ganado
-        if (GetPlayerScore() > 21)
+        int winner = DetermineWinner();
+        ShowResult(winner);
+    }
+
+    private int DetermineWinner()
+    {
+        int playerScore = GetPlayerScore();
+        int dealerScore = GetDealerScore();
+
+        if (playerScore > 21)
         {
-            finalMessage.text = "El dealer ha ganado.";
+            return 2; // Dealer gana
         }
-        else if (GetDealerScore() > 21)
+        else if (dealerScore > 21)
         {
-            finalMessage.text = "El jugador ha ganado.";
+            return 1; // Jugador gana
         }
-        else if (GetPlayerScore() > GetDealerScore())
+        else if (playerScore == dealerScore)
         {
-            finalMessage.text = "El jugador ha ganado.";
+            return 0; // Empate
         }
-        else if (GetDealerScore() > GetPlayerScore())
+        else if (playerScore > dealerScore)
         {
-            finalMessage.text = "El dealer ha ganado.";
+            return 1; // Jugador gana
         }
         else
         {
-            finalMessage.text = "Es un empate.";
+            return 2; // Dealer gana
         }
     }
+
+    private void ShowResult(int winner)
+    {
+        switch (winner)
+        {
+            case 0: // Empate
+                finalMessage.text= "Empate";
+                break;
+            case 1: // Jugador gana
+                finalMessage.text = "¡Has ganado!";
+                break;
+            case 2: // Dealer gana
+                finalMessage.text = "El dealer ha ganado";
+                break;
+        }
+    }
+
+
 
     public void PlayAgain()
     {
