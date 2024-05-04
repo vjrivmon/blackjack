@@ -68,18 +68,21 @@ public class Deck : MonoBehaviour
         {
             PushPlayer();
             PushDealer();
+        }
 
-            /*// Asumiendo que tienes métodos GetPlayerScore() y GetDealerScore() que devuelven la puntuación actual
-            if (GetPlayerScore() == 21 && i == 1) // Verificar si el jugador tiene Blackjack después de repartir las dos cartas
-            {
-                finalMessage.text = "El jugador tiene Blackjack!";
-                return; // Terminar el juego
-            }
-            else if (GetDealerScore() == 21 && i == 1) // Verificar si el crupier tiene Blackjack después de repartir las dos cartas
-            {
-                finalMessage.text = "El crupier tiene Blackjack!";
-                return; // Terminar el juego
-            }*/
+        // Verificar Blackjacks iniciales 
+        if (GetPlayerScore() == 21)
+        {
+            finalMessage.text = "El jugador tiene Blackjack!";
+        }
+        else if (GetDealerScore() == 21)
+        {
+            finalMessage.text = "El crupier tiene Blackjack!";
+        }
+        else // Si no hay Blackjack, se habilita la opción de pedir carta
+        {
+            hitButton.interactable = true;
+            stickButton.interactable = true;
         }
     }
 
@@ -165,13 +168,21 @@ public class Deck : MonoBehaviour
 
         // Calcular las probabilidades después de repartir la carta
         CalculateProbabilities();
+        playerPointsText.text = player.GetComponent<CardHand>().points.ToString();
+
+        // Verificar si el jugador se pasa de 21 automáticamente
+        if (GetPlayerScore() > 21)
+        {
+            Stand(); // forzar Stand para cumplir la lógica
+        }
+
     }
+
 
     public void Hit()
     {
         
 
-        // Repartir carta al jugador
         PushPlayer();
 
     }
@@ -179,7 +190,8 @@ public class Deck : MonoBehaviour
     {
       
 
-        while (GetDealerScore() <= 16)
+        // Lógica del dealer (pedir hasta llegar a 17 o más)
+        while (GetDealerScore() < 17)
         {
             PushDealer();
         }
@@ -193,6 +205,7 @@ public class Deck : MonoBehaviour
         int playerScore = GetPlayerScore();
         int dealerScore = GetDealerScore();
 
+        // Lógica considerando pasarse de 21
         if (playerScore > 21)
         {
             return 2; // Dealer gana
@@ -201,6 +214,7 @@ public class Deck : MonoBehaviour
         {
             return 1; // Jugador gana
         }
+        // Resto de la lógica de comparación...
         else if (playerScore == dealerScore)
         {
             return 0; // Empate
@@ -214,7 +228,6 @@ public class Deck : MonoBehaviour
             return 2; // Dealer gana
         }
     }
-
     private void ShowResult(int winner)
     {
         switch (winner)
@@ -246,6 +259,7 @@ public class Deck : MonoBehaviour
         cardIndex = 0;
         ShuffleCards();
         StartGame();
+        isInitialHand = true; // Restaurar la bandera de mano inicial
     }
 
 
