@@ -108,53 +108,68 @@ public class Deck : MonoBehaviour
 
     private void CalculateProbabilities()
     {
-        int playerScore = GetPlayerScore();
-        int dealerScore = GetDealerScore();
-        int remainingCards = GetRemainingCards();
-    
-        // Probabilidad de que el dealer tenga más puntuación que el jugador
-        int dealerHigherScoreCount = 0;
-        for (int i = 0; i < remainingCards; i++)
+        /*TODO:
+        * Calcular las probabilidades de:
+        * - Teniendo la carta oculta, probabilidad de que el dealer tenga más puntuación que el jugador
+        * - Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta
+        * - Probabilidad de que el jugador obtenga más de 21 si pide una carta          
+        */
+
+        float probability1 = 0;
+        float probability2 = 0;
+        float probability3 = 0;
+
+        //calcular la probabilidad de que sabiendo que la baraja del blackjack tiene 52 cartas, probabilidad de que teniendo la carta oculta, el dealer tenga más puntuación que el jugador
+        for (int i = cardIndex; i < values.Length; i++)
         {
-            int newDealerScore = dealerScore + values[order[i]];
-            if (newDealerScore > playerScore && newDealerScore <= 21)
+            if (dealer.GetComponent<CardHand>().points + values[i] > player.GetComponent<CardHand>().points)
             {
-                dealerHigherScoreCount++;
+                probability1++;
             }
         }
-        float dealerHigherScoreProbability = (float)dealerHigherScoreCount / remainingCards;
-    
-        // Probabilidad de que el jugador obtenga entre 17 y 21 o blackjack
-        int player17to21Count = 0;
-        int playerBlackjackCount = 0;
-        for (int i = 0; i < remainingCards; i++)
+
+        //calcular la probabilidad de que sabiendo que la baraja del blackjack tiene 52 cartas, probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta
+        for (int i = cardIndex; i < values.Length; i++)
         {
-            int newScore = playerScore + values[order[i]];
-            if (newScore >= 17 && newScore <= 21)
+            if (player.GetComponent<CardHand>().points + values[i] >= 17 && player.GetComponent<CardHand>().points + values[i] <= 21)
             {
-                player17to21Count++;
-            }
-            if (newScore == 21)
-            {
-                playerBlackjackCount++;
+                probability2++;
             }
         }
-        float player17to21Probability = (float)(player17to21Count + playerBlackjackCount) / remainingCards;
-    
-        // Probabilidad de que el jugador se pase de 21
-        int playerBustCount = 0;
-        for (int i = 0; i < remainingCards; i++)
+
+        //calcular la probabilidad de que sabiendo que la baraja del blackjack tiene 52 cartas, probabilidad de que el jugador obtenga más de 21 si pide una carta
+        for (int i = cardIndex; i < values.Length; i++)
         {
-            if (playerScore + values[order[i]] > 21)
+            if (player.GetComponent<CardHand>().points + values[i] > 21)
             {
-                playerBustCount++;
+                probability3++;
             }
         }
-        float playerBustProbability = (float)playerBustCount / remainingCards;
-    
-        prob1.text = Math.Round(dealerHigherScoreProbability, 4).ToString();
-        prob2.text = Math.Round(player17to21Probability, 4).ToString();
-        prob3.text = Math.Round(playerBustProbability, 4).ToString();
+
+
+
+
+        /* Calcular las probabilidades
+        for (int i = cardIndex; i < values.Length; i++)
+        {
+            if (dealer.GetComponent<CardHand>().points + values[i] > player.GetComponent<CardHand>().points)
+            {
+                probability1++;
+            }
+            if (player.GetComponent<CardHand>().points + values[i] >= 17 && player.GetComponent<CardHand>().points + values[i] <= 21)
+            {
+                probability2++;
+            }
+            if (player.GetComponent<CardHand>().points + values[i] > 21)
+            {
+                probability3++;
+            }
+        }*/
+
+
+        prob1.text = Math.Round(probability1 * 0.01, 4).ToString();
+        prob2.text = Math.Round(probability2 * 0.01, 4).ToString();
+        prob3.text = Math.Round(probability3 * 0.01, 4).ToString();
     }
 
     void PushDealer()
@@ -211,9 +226,9 @@ public class Deck : MonoBehaviour
         CardHand dealerHand = dealer.GetComponent<CardHand>();
 
         // Mostrar la cara de la carta del dealer que está boca abajo
-        
-            dealerHand.cards[0].GetComponent<CardModel>().ToggleFace(true);
-        
+
+        dealerHand.cards[0].GetComponent<CardModel>().ToggleFace(true);
+
         // Lógica del dealer (pedir hasta llegar a 17 o más)
         while (GetDealerScore() < 17)
         {
@@ -259,7 +274,7 @@ public class Deck : MonoBehaviour
         switch (winner)
         {
             case 0: // Empate
-                finalMessage.text= "Empate";
+                finalMessage.text = "Empate";
                 break;
             case 1: // Jugador gana
                 finalMessage.text = "¡Has ganado!";
@@ -275,9 +290,9 @@ public class Deck : MonoBehaviour
         hitButton.interactable = true;
         stickButton.interactable = true;
         finalMessage.text = "";
-        prob1.text="";
-        prob2.text="";
-        prob3.text="";
+        prob1.text = "";
+        prob2.text = "";
+        prob3.text = "";
         player.GetComponent<CardHand>().Clear();
         dealer.GetComponent<CardHand>().Clear();
         cardIndex = 0;
