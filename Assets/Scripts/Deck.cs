@@ -22,6 +22,8 @@ public class Deck : MonoBehaviour
     public int[] values = new int[52];
     int cardIndex = 0;
 
+    int[] order = new int[52];
+
     private void Awake()
     {
         InitCardValues();
@@ -74,6 +76,9 @@ public class Deck : MonoBehaviour
             Sprite tempFace = faces[k];
             faces[k] = faces[n];
             faces[n] = tempFace;
+
+            // Guardar el orden de las cartas
+            order[n] = k;
         }
     }
 
@@ -150,12 +155,10 @@ public class Deck : MonoBehaviour
         prob1.text = Math.Round(dealerHigherScoreProbability, 4).ToString();
         prob2.text = Math.Round(player17to21Probability, 4).ToString();
         prob3.text = Math.Round(playerBustProbability, 4).ToString();
-    }*/*/
+    }*/
 
     void PushDealer()
     {
-        dealerCardHand.Push(faces[cardIndex]).values[order[cardIndex]]);
-        cardIndex++;
         // Asegurarse de que no se repartan más cartas de las que hay en la baraja
         if (cardIndex >= faces.Length)
         {
@@ -164,8 +167,8 @@ public class Deck : MonoBehaviour
         }
 
         // Repartir la carta al crupier
-        //dealer.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]);
-        //cardIndex++;
+        dealer.GetComponent<CardHand>().Push(faces[order[cardIndex]], values[order[cardIndex]]);
+        cardIndex++;
     }
 
     void PushPlayer()
@@ -178,19 +181,17 @@ public class Deck : MonoBehaviour
         }
 
         // Repartir la carta al jugador
-        player.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]);
+        player.GetComponent<CardHand>().Push(faces[order[cardIndex]], values[order[cardIndex]]);
         cardIndex++;
 
-        // Calcular las probabilidades después de repartir la carta
-        CalculateProbabilities();
-        playerPointsText.text = player.GetComponent<CardHand>().points.ToString();
+        // Actualizar el texto de los puntos del jugador
+        pointsPlayer.text = player.GetComponent<CardHand>().points.ToString();
 
         // Verificar si el jugador se pasa de 21 automáticamente
         if (GetPlayerScore() > 21)
         {
             Stand(); // forzar Stand para cumplir la lógica
         }
-
     }
 
 
@@ -274,7 +275,7 @@ public class Deck : MonoBehaviour
         cardIndex = 0;
         ShuffleCards();
         StartGame();
-        isInitialHand = true; // Restaurar la bandera de mano inicial
+        //isInitialHand = true; // Restaurar la bandera de mano inicial
     }
 
 
