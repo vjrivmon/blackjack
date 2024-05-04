@@ -38,9 +38,24 @@ public class Deck : MonoBehaviour
     {
         for (int i = 0; i < values.Length; i++)
         {
-            values[i] = i % 13 + 1;
-            if (values[i] > 10) values[i] = 10;
-            if (values[i] == 1) values[i] = 11;
+            values[i] = (i % 13) + 1;
+            if (values[i] > 10)
+            {
+                values[i] = 10;
+            }
+            if (values[i] == 1)
+            {
+                // Si el valor actual es un As (1), asignamos 11 a menos que 
+                // al hacerlo se exceda el límite de 21, en cuyo caso, asignamos 1.
+                if (dealer.GetComponent<CardHand>().points + 11 <= 21 || player.GetComponent<CardHand>().points + 11 <= 21)
+                {
+                    values[i] = 11;
+                }
+                else
+                {
+                    values[i] = 1;
+                }
+            }
         }
     }
     private void ShuffleCards()

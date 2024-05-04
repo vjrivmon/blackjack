@@ -58,43 +58,34 @@ public class CardHand : MonoBehaviour
             cardCopy.GetComponent<CardModel>().ToggleFace(false);
         else
             cardCopy.GetComponent<CardModel>().ToggleFace(true);
+        // Actualizamos points con el nuevo valor
+        UpdatePoints();
+    }
 
-        //Calculamos la puntuación de nuestra mano
-        int val = 0;
-        int aces = 0;
-        foreach (GameObject f in cards)
+        private void UpdatePoints()
         {
-
-            if (f.GetComponent<CardModel>().value != 11)
-                val += f.GetComponent<CardModel>().value;
-            else
-                aces++;
-        }
-
-        for (int i = 0; i < aces; i++)
-        {
-            if (val + 11 <= 21)
+            int val = 0;
+            int aces = 0;
+            foreach (GameObject f in cards)
             {
-                val = val + 11;
+                if (f.GetComponent<CardModel>().value != 11)
+                    val += f.GetComponent<CardModel>().value;
+                else
+                    aces++;
             }
-            else
+
+            for (int i = 0; i < aces; i++)
             {
-                val = val + 1;
+                if (val + 11 <= 21)
+                {
+                    val += 11;
+                }
+                else
+                {
+                    val += 1;
+                }
             }
-        }
 
-        points = val;
-
-    }
-    public void FlipFirstCard()
-    {
-        if (cards.Count > 0)
-        {
-            cards[0].GetComponent<CardModel>().ToggleFace(true);
+            points = val;
         }
     }
-    public int GetScore()
-    {
-        return points;
-    }
-}
