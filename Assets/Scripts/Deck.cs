@@ -111,47 +111,47 @@ public class Deck : MonoBehaviour
         int playerScore = GetPlayerScore();
         int dealerScore = GetDealerScore();
         int remainingCards = GetRemainingCards();
-
+    
         // Probabilidad de que el dealer tenga más puntuación que el jugador
         int dealerHigherScoreCount = 0;
         for (int i = 0; i < remainingCards; i++)
         {
-            int newDealerScore = dealerScore + values[i];
-            if (newDealerScore > playerScore)
+            int newDealerScore = dealerScore + values[order[i]];
+            if (newDealerScore > playerScore && newDealerScore <= 21)
             {
                 dealerHigherScoreCount++;
             }
         }
         float dealerHigherScoreProbability = (float)dealerHigherScoreCount / remainingCards;
-
+    
         // Probabilidad de que el jugador obtenga entre 17 y 21 o blackjack
         int player17to21Count = 0;
         int playerBlackjackCount = 0;
         for (int i = 0; i < remainingCards; i++)
         {
-            int newScore = playerScore + values[i];
-            if (newScore <= 21)
+            int newScore = playerScore + values[order[i]];
+            if (newScore >= 17 && newScore <= 21)
             {
                 player17to21Count++;
             }
-            else if (newScore == 22 && playerScore == 11) // Blackjack
+            if (newScore == 21)
             {
                 playerBlackjackCount++;
             }
         }
         float player17to21Probability = (float)(player17to21Count + playerBlackjackCount) / remainingCards;
-
+    
         // Probabilidad de que el jugador se pase de 21
         int playerBustCount = 0;
         for (int i = 0; i < remainingCards; i++)
         {
-            if (playerScore + values[i] > 21)
+            if (playerScore + values[order[i]] > 21)
             {
                 playerBustCount++;
             }
         }
         float playerBustProbability = (float)playerBustCount / remainingCards;
-
+    
         prob1.text = Math.Round(dealerHigherScoreProbability, 4).ToString();
         prob2.text = Math.Round(player17to21Probability, 4).ToString();
         prob3.text = Math.Round(playerBustProbability, 4).ToString();
@@ -169,6 +169,8 @@ public class Deck : MonoBehaviour
         // Repartir la carta al crupier
         dealer.GetComponent<CardHand>().Push(faces[order[cardIndex]], values[order[cardIndex]]);
         cardIndex++;
+
+        CalculateProbabilities();
     }
 
     void PushPlayer()
@@ -192,6 +194,8 @@ public class Deck : MonoBehaviour
         {
             Stand(); // forzar Stand para cumplir la lógica
         }
+
+        CalculateProbabilities();
     }
 
 
@@ -214,6 +218,8 @@ public class Deck : MonoBehaviour
 
         int winner = DetermineWinner();
         ShowResult(winner);
+
+        CalculateProbabilities();
     }
 
     private int DetermineWinner()
