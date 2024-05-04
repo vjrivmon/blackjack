@@ -197,15 +197,19 @@ public class Deck : MonoBehaviour
 
     public void Hit()
     {
-        
-
         PushPlayer();
 
     }
     public void Stand()
     {
-      
+        hitButton.interactable = false;
+        // Obtener la mano del dealer
+        CardHand dealerHand = dealer.GetComponent<CardHand>();
 
+        // Mostrar la cara de la carta del dealer que está boca abajo
+        
+            dealerHand.cards[0].GetComponent<CardModel>().ToggleFace(true);
+        
         // Lógica del dealer (pedir hasta llegar a 17 o más)
         while (GetDealerScore() < 17)
         {
@@ -260,8 +264,6 @@ public class Deck : MonoBehaviour
         }
     }
 
-
-
     public void PlayAgain()
     {
         hitButton.interactable = true;
@@ -275,7 +277,6 @@ public class Deck : MonoBehaviour
         cardIndex = 0;
         ShuffleCards();
         StartGame();
-        //isInitialHand = true; // Restaurar la bandera de mano inicial
     }
 
 
@@ -297,13 +298,4 @@ public class Deck : MonoBehaviour
     {
         return values.Length - cardIndex;
     }
-
-
-
-
-    // Assuming you have a boolean variable isInitialHand that is set to true when the game starts and set to false when the first action (Hit or Stand) is taken
-    /*public bool IsInitialHand()
-    {
-        return isInitialHand;
-    }*/
 }
