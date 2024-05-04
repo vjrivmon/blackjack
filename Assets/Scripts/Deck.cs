@@ -5,7 +5,6 @@ using UnityEngine.UI;
 public class Deck : MonoBehaviour
 {
 
-    /* values: para asignar un valor a cada una de las 52 cartas. cardIndex: para mantener el contador de las cartas repartidas. Adem´ as, se definen los siguientes m´etodos que representan la din´amica del juego: InitCardValues. Este m´etodo se encarga de inicializar los valores de las 52 cartas. En principio, la posici´on de los valores se deber´an corresponder con la posici´on de faces. En este sentido, si la carta de la posici´on 1 de faces es el 2 de corazones, el valor de la posici´on 1 deber´ ıa ser un 2. ShuffleCards. Este m´etodo se encarga de barajar las cartas de manera aleatoria. StartGame. Este m´etodo se encarga de repartir las dos primeras manos. CalculateProbabilities. Este m´ etodo se encarga de calcular varias probabilidades en funci´on de las cartas que ya hay sobre la mesa. PushDealer. Este m´etodo se encarga de repartir una carta al Dealer. PushPlayer. Este m´etodo se encarga de repartir una carta al Dealer. Hit. Este m´etodo se asocia al bot´on Hit e implementa la l´ogica de pedir carta. Stand. Este m´etodo se asocia al bot´on Stand e implementa la l´ogica de plantarse. PlayAgain. Este m´ etodo se asocia al bot´on PlayAgain y se encarga de inicializar los valores para volver a jugar.*/
     public Sprite[] faces;
     public GameObject dealer;
     public GameObject player;
@@ -17,7 +16,8 @@ public class Deck : MonoBehaviour
     public Text prob1;
     public Text prob2;
     public Text prob3;
-    private bool isInitialHand = true;
+    public Text pointsPlayer;
+    public Text pointsDealer;
 
     public int[] values = new int[52];
     int cardIndex = 0;
@@ -33,44 +33,14 @@ public class Deck : MonoBehaviour
         ShuffleCards();
         StartGame();
     }
-    // Assuming you have a CardHand script with a method GetScore() that calculates the score of a hand
-    public int GetPlayerScore()
-    {
-        return player.GetComponent<CardHand>().GetScore();
-    }
 
-    public int GetDealerScore()
-    {
-        return dealer.GetComponent<CardHand>().GetScore();
-    }
-
-    public int GetRemainingCards()
-    {
-        return values.Length - cardIndex;
-    }
-
-    // Assuming you have a boolean variable isInitialHand that is set to true when the game starts and set to false when the first action (Hit or Stand) is taken
-    public bool IsInitialHand()
-    {
-        return isInitialHand;
-    }
     private void InitCardValues()
     {
-        values = new int[52];
-        for (int i = 0; i < 52; i++)
+        for (int i = 0; i < values.Length; i++)
         {
-            if (i % 13 < 9) // Números del 2 al 10
-            {
-                values[i] = (i % 13) + 2;
-            }
-            else if (i % 13 == 10 || i % 13 == 11 || i % 13 == 12) // J, Q, K
-            {
-                values[i] = 10;
-            }
-            else // As
-            {
-                values[i] = 11;
-            }
+            values[i] = i % 13 + 1;
+            if (values[i] > 10) values[i] = 10;
+            if (values[i] == 1) values[i] = 11;
         }
     }
     private void ShuffleCards()
@@ -113,7 +83,7 @@ public class Deck : MonoBehaviour
         }
     }
 
-    private void CalculateProbabilities()
+    /*private void CalculateProbabilities()
     {
         int playerScore = GetPlayerScore();
         int dealerScore = GetDealerScore();
@@ -162,10 +132,12 @@ public class Deck : MonoBehaviour
         prob1.text = Math.Round(dealerHigherScoreProbability, 4).ToString();
         prob2.text = Math.Round(player17to21Probability, 4).ToString();
         prob3.text = Math.Round(playerBustProbability, 4).ToString();
-    }
+    }*/*/
 
     void PushDealer()
     {
+        dealerCardHand.Push(faces[cardIndex]).values[order[cardIndex]]);
+        cardIndex++;
         // Asegurarse de que no se repartan más cartas de las que hay en la baraja
         if (cardIndex >= faces.Length)
         {
@@ -174,8 +146,8 @@ public class Deck : MonoBehaviour
         }
 
         // Repartir la carta al crupier
-        dealer.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]);
-        cardIndex++;
+        //dealer.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]);
+        //cardIndex++;
     }
 
     void PushPlayer()
@@ -197,12 +169,7 @@ public class Deck : MonoBehaviour
 
     public void Hit()
     {
-        // Asumiendo que tienes un método IsInitialHand() que devuelve true si estamos en la mano inicial
-        if (IsInitialHand())
-        {
-            // Voltear la primera carta del dealer
-            dealer.GetComponent<CardHand>().FlipFirstCard();
-        }
+        
 
         // Repartir carta al jugador
         PushPlayer();
@@ -210,10 +177,7 @@ public class Deck : MonoBehaviour
     }
     public void Stand()
     {
-        if (IsInitialHand())
-        {
-            dealer.GetComponent<CardHand>().FlipFirstCard();
-        }
+      
 
         while (GetDealerScore() <= 16)
         {
@@ -284,4 +248,32 @@ public class Deck : MonoBehaviour
         StartGame();
     }
 
+
+
+    //--------------------------------
+    public int GetPlayerScore()
+    {
+        pointsPlayer.text = player.GetComponent<CardHand>().points.ToString();
+        return player.GetComponent<CardHand>().points;
+    }
+
+    public int GetDealerScore()
+    {
+        pointsDealer.text = dealer.GetComponent<CardHand>().points.ToString();
+        return dealer.GetComponent<CardHand>().points;
+    }
+
+    public int GetRemainingCards()
+    {
+        return values.Length - cardIndex;
+    }
+
+
+
+
+    // Assuming you have a boolean variable isInitialHand that is set to true when the game starts and set to false when the first action (Hit or Stand) is taken
+    /*public bool IsInitialHand()
+    {
+        return isInitialHand;
+    }*/
 }
