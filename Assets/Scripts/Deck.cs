@@ -106,7 +106,7 @@ public class Deck : MonoBehaviour
         }
     }
 
-    /*private void CalculateProbabilities()
+    private void CalculateProbabilities()
     {
         int playerScore = GetPlayerScore();
         int dealerScore = GetDealerScore();
@@ -155,7 +155,7 @@ public class Deck : MonoBehaviour
         prob1.text = Math.Round(dealerHigherScoreProbability, 4).ToString();
         prob2.text = Math.Round(player17to21Probability, 4).ToString();
         prob3.text = Math.Round(playerBustProbability, 4).ToString();
-    }*/
+    }
 
     void PushDealer()
     {
