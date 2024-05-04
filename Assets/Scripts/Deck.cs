@@ -17,6 +17,9 @@ public class Deck : MonoBehaviour
     public Text prob1;
     public Text prob2;
     public Text prob3;
+    public Text playerPointsText;
+    public Text dealerPointsText;
+
     private bool isInitialHand = true;
 
     public int[] values = new int[52];
@@ -59,20 +62,21 @@ public class Deck : MonoBehaviour
         values = new int[52];
         for (int i = 0; i < 52; i++)
         {
-            if (i % 13 < 9) // Números del 2 al 10
+            if (i % 13 < 9) // Los números 2 a 10
             {
                 values[i] = (i % 13) + 2;
             }
-            else if (i % 13 == 10 || i % 13 == 11 || i % 13 == 12) // J, Q, K
+            else if (i % 13 < 12) // Las figuras J, Q, K
             {
                 values[i] = 10;
             }
-            else // As
+            else // El As
             {
-                values[i] = 11;
+                values[i] = 11; // En el juego de Blackjack, el As puede valer 1 u 11. Aquí lo inicializamos a 11.
             }
         }
     }
+
     private void ShuffleCards()
     {
         System.Random rng = new System.Random();
@@ -99,7 +103,7 @@ public class Deck : MonoBehaviour
             PushPlayer();
             PushDealer();
 
-            /*// Asumiendo que tienes métodos GetPlayerScore() y GetDealerScore() que devuelven la puntuación actual
+            // Asumiendo que tienes métodos GetPlayerScore() y GetDealerScore() que devuelven la puntuación actual
             if (GetPlayerScore() == 21 && i == 1) // Verificar si el jugador tiene Blackjack después de repartir las dos cartas
             {
                 finalMessage.text = "El jugador tiene Blackjack!";
@@ -109,7 +113,7 @@ public class Deck : MonoBehaviour
             {
                 finalMessage.text = "El crupier tiene Blackjack!";
                 return; // Terminar el juego
-            }*/
+            }
         }
     }
 
@@ -176,6 +180,8 @@ public class Deck : MonoBehaviour
         // Repartir la carta al crupier
         dealer.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]);
         cardIndex++;
+        dealerPointsText.text = dealer.GetComponent<CardHand>().points.ToString();
+
     }
 
     void PushPlayer()
@@ -193,7 +199,10 @@ public class Deck : MonoBehaviour
 
         // Calcular las probabilidades después de repartir la carta
         CalculateProbabilities();
+        playerPointsText.text = player.GetComponent<CardHand>().points.ToString();
+
     }
+
 
     public void Hit()
     {
