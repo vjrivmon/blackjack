@@ -18,11 +18,18 @@ public class Deck : MonoBehaviour
     public Text prob3;
     public Text pointsPlayer;
     public Text pointsDealer;
+    public Dropdown betDropdown;
+    public Text bankText;
+    public Text finalApuestaMessage;
+    public Button confirmButton;
 
     public int[] values = new int[52];
     int cardIndex = 0;
 
     int[] order = new int[52];
+
+    private int bank = 1000;
+    private int bet = 0;
 
     private void Awake()
     {
@@ -34,6 +41,11 @@ public class Deck : MonoBehaviour
     {
         ShuffleCards();
         StartGame();
+        confirmButton.onClick.AddListener(OnConfirm);
+        bank = 1000;
+        //betDropdown.onValueChanged.AddListener(delegate { OnBet(); });
+        betDropdown.onValueChanged.AddListener(OnBetDropdownChanged);
+        UpdateBankText();
     }
 
     private void InitCardValues()
@@ -229,6 +241,10 @@ public class Deck : MonoBehaviour
     {
         PushPlayer();
 
+        // Desactiva el Dropdown y el botón de confirmación para que el jugador no pueda cambiar su apuesta
+        betDropdown.interactable = false;
+        confirmButton.interactable = false;
+
     }
     public void Stand()
     {
@@ -260,10 +276,12 @@ public class Deck : MonoBehaviour
         // Lógica considerando pasarse de 21
         if (playerScore > 21)
         {
+            OnLose();
             return 2; // Dealer gana
         }
         else if (dealerScore > 21)
         {
+            OnWin();
             return 1; // Jugador gana
         }
         // Resto de la lógica de comparación...
@@ -273,10 +291,12 @@ public class Deck : MonoBehaviour
         }
         else if (playerScore > dealerScore)
         {
+            OnWin();
             return 1; // Jugador gana
         }
         else
         {
+            OnLose();
             return 2; // Dealer gana
         }
     }
@@ -289,17 +309,21 @@ public class Deck : MonoBehaviour
                 break;
             case 1: // Jugador gana
                 finalMessage.text = "¡Has ganado!";
+                OnWin();
                 break;
             case 2: // Dealer gana
                 finalMessage.text = "El dealer ha ganado";
                 break;
         }
+        stickButton.interactable = false;
     }
 
     public void PlayAgain()
     {
         hitButton.interactable = true;
         stickButton.interactable = true;
+        betDropdown.interactable = true;
+        confirmButton.interactable = true;
         finalMessage.text = "";
         prob1.text = "";
         prob2.text = "";
@@ -309,6 +333,7 @@ public class Deck : MonoBehaviour
         cardIndex = 0;
         ShuffleCards();
         StartGame();
+        UpdateBankText();
     }
 
 
@@ -330,4 +355,64 @@ public class Deck : MonoBehaviour
     {
         return values.Length - cardIndex;
     }
+
+    //------------------------------
+    public void OnConfirm()
+    {
+        string betText = betDropdown.options[betDropdown.value].text.Replace(" Credits", "");
+        int betValue;
+        if (int.TryParse(betText, out betValue))
+        {
+            if (betValue > bank)
+            {
+                finalApuestaMessage.text = "No tienes suficiente dinero para hacer esa apuesta";
+            }
+            else
+            {
+                bet = betValue;
+                bank -= bet;
+                UpdateBankText();
+            }
+        }
+        else
+        {
+            Debug.LogError("Valor de apuesta no válido: " + betDropdown.options[betDropdown.value].text);
+        }
+    }
+
+    public void OnWin()
+    {
+        bank += bet * 2;
+        UpdateBankText();
+    }
+
+    public void OnLose()
+    {
+        UpdateBankText();
+        if (bank <= 0)
+        {
+            EndGame();
+        }
+    }
+
+    private void UpdateBankText()
+    {
+        bankText.text = bank.ToString() + "€";
+    }
+    private void EndGame()
+    {
+        hitButton.interactable = false;
+        stickButton.interactable = false;
+        playAgainButton.interactable = false;
+        betDropdown.interactable = false;
+        confirmButton.interactable = false;
+        finalApuestaMessage.text = "¡Has perdido! No te queda más dinero";
+    }
+
+    public void OnBetDropdownChanged(int index)
+    {
+    // Limpia el mensaje de error cada vez que se selecciona una opción en el Dropdown
+    finalApuestaMessage.text = "";
+    }
+
 }
