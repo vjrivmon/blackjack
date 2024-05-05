@@ -119,6 +119,8 @@ public class Deck : MonoBehaviour
         float probability2 = 0;
         float probability3 = 0;
 
+        int remainingCards = values.Length - cardIndex;
+
         //calcular la probabilidad de que sabiendo que la baraja del blackjack tiene 52 cartas, probabilidad de que teniendo la carta oculta, el dealer tenga más puntuación que el jugador
         for (int i = cardIndex; i < values.Length; i++)
         {
@@ -167,9 +169,18 @@ public class Deck : MonoBehaviour
         }*/
 
 
-        prob1.text = Math.Round(probability1 * 0.01, 4).ToString();
-        prob2.text = Math.Round(probability2 * 0.01, 4).ToString();
-        prob3.text = Math.Round(probability3 * 0.01, 4).ToString();
+        if (remainingCards != 0)
+        {
+            prob1.text = Math.Round((probability1 / remainingCards), 4).ToString();
+            prob2.text = Math.Round((probability2 / remainingCards), 4).ToString();
+            prob3.text = Math.Round((probability3 / remainingCards), 4).ToString();
+        }
+        else
+        {
+            prob1.text = "0";
+            prob2.text = "0";
+            prob3.text = "0";
+        }
     }
 
     void PushDealer()
