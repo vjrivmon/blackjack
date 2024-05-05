@@ -22,31 +22,26 @@ public class Deck : MonoBehaviour
     public Text bankText;
     public Text finalApuestaMessage;
     public Button confirmButton;
-
     public int[] values = new int[52];
     int cardIndex = 0;
-
     int[] order = new int[52];
-
     private int bank = 1000;
     private int bet = 0;
-
     private void Awake()
     {
         InitCardValues();
-
     }
-
     private void Start()
     {
         ShuffleCards();
         StartGame();
         confirmButton.onClick.AddListener(OnConfirm);
         bank = 1000;
-        //betDropdown.onValueChanged.AddListener(delegate { OnBet(); });
         betDropdown.onValueChanged.AddListener(OnBetDropdownChanged);
         UpdateBankText();
     }
+    
+    
 
     private void InitCardValues()
     {
@@ -72,6 +67,8 @@ public class Deck : MonoBehaviour
             }
         }
     }
+
+
     private void ShuffleCards()
     {
         System.Random rng = new System.Random();
@@ -93,6 +90,7 @@ public class Deck : MonoBehaviour
             order[n] = k;
         }
     }
+
 
     void StartGame()
     {
@@ -118,15 +116,9 @@ public class Deck : MonoBehaviour
         }
     }
 
+
     private void CalculateProbabilities()
     {
-        /*TODO:
-        * Calcular las probabilidades de:
-        * - Teniendo la carta oculta, probabilidad de que el dealer tenga más puntuación que el jugador
-        * - Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta
-        * - Probabilidad de que el jugador obtenga más de 21 si pide una carta          
-        */
-
         float probability1 = 0;
         float probability2 = 0;
         float probability3 = 0;
@@ -160,27 +152,6 @@ public class Deck : MonoBehaviour
             }
         }
 
-
-
-
-        /* Calcular las probabilidades
-        for (int i = cardIndex; i < values.Length; i++)
-        {
-            if (dealer.GetComponent<CardHand>().points + values[i] > player.GetComponent<CardHand>().points)
-            {
-                probability1++;
-            }
-            if (player.GetComponent<CardHand>().points + values[i] >= 17 && player.GetComponent<CardHand>().points + values[i] <= 21)
-            {
-                probability2++;
-            }
-            if (player.GetComponent<CardHand>().points + values[i] > 21)
-            {
-                probability3++;
-            }
-        }*/
-
-
         if (remainingCards != 0)
         {
             prob1.text = Math.Round((probability1 / remainingCards), 4).ToString();
@@ -194,6 +165,7 @@ public class Deck : MonoBehaviour
             prob3.text = "0";
         }
     }
+
 
     void PushDealer()
     {
@@ -210,6 +182,7 @@ public class Deck : MonoBehaviour
 
         CalculateProbabilities();
     }
+
 
     void PushPlayer()
     {
@@ -230,7 +203,7 @@ public class Deck : MonoBehaviour
         // Verificar si el jugador se pasa de 21 automáticamente
         if (GetPlayerScore() > 21)
         {
-            Stand(); // forzar Stand para cumplir la lógica
+            Stand(); 
         }
 
         CalculateProbabilities();
@@ -244,8 +217,9 @@ public class Deck : MonoBehaviour
         // Desactiva el Dropdown y el botón de confirmación para que el jugador no pueda cambiar su apuesta
         betDropdown.interactable = false;
         confirmButton.interactable = false;
-
     }
+
+
     public void Stand()
     {
         hitButton.interactable = false;
@@ -267,6 +241,7 @@ public class Deck : MonoBehaviour
 
         CalculateProbabilities();
     }
+
 
     private int DetermineWinner()
     {
@@ -300,6 +275,8 @@ public class Deck : MonoBehaviour
             return 2; // Dealer gana
         }
     }
+
+
     private void ShowResult(int winner)
     {
         switch (winner)
@@ -317,6 +294,7 @@ public class Deck : MonoBehaviour
         }
         stickButton.interactable = false;
     }
+
 
     public void PlayAgain()
     {
@@ -337,13 +315,12 @@ public class Deck : MonoBehaviour
     }
 
 
-
-    //--------------------------------
     public int GetPlayerScore()
     {
         pointsPlayer.text = player.GetComponent<CardHand>().points.ToString();
         return player.GetComponent<CardHand>().points;
     }
+
 
     public int GetDealerScore()
     {
@@ -351,12 +328,13 @@ public class Deck : MonoBehaviour
         return dealer.GetComponent<CardHand>().points;
     }
 
+
     public int GetRemainingCards()
     {
         return values.Length - cardIndex;
     }
 
-    //------------------------------
+
     public void OnConfirm()
     {
         string betText = betDropdown.options[betDropdown.value].text.Replace(" Credits", "");
@@ -380,11 +358,13 @@ public class Deck : MonoBehaviour
         }
     }
 
+
     public void OnWin()
     {
         bank += bet * 2;
         UpdateBankText();
     }
+
 
     public void OnLose()
     {
@@ -395,10 +375,13 @@ public class Deck : MonoBehaviour
         }
     }
 
+
     private void UpdateBankText()
     {
         bankText.text = bank.ToString() + "€";
     }
+
+
     private void EndGame()
     {
         hitButton.interactable = false;
@@ -409,10 +392,9 @@ public class Deck : MonoBehaviour
         finalApuestaMessage.text = "¡Has perdido! No te queda más dinero";
     }
 
+
     public void OnBetDropdownChanged(int index)
     {
-    // Limpia el mensaje de error cada vez que se selecciona una opción en el Dropdown
     finalApuestaMessage.text = "";
     }
-
 }
